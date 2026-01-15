@@ -1,11 +1,11 @@
 # gpiosvr
 An asyncio-based service translating GPIO signals into Linux kernel key events.
 
-Developed and tested for Raspberry Pi variants, namely Pi 3B, 4B and Pico 1 attached via USB. On Pi 3B and Pi 4B, [pigpiod](https://abyz.me.uk/rpi/pigpio/pigpiod.html) is used as a backend for evaluating GPIO edges. As this does not work on Pi 5B any more, [libgpiod](https://libgpiod.readthedocs.io/en/latest/) is currently adapted as an alternative backend.
+Developed and tested for Raspberry Pi variants, namely Pi 3B, 4B and Pico 1 connected via USB. On Pi 3B and Pi 4B, [pigpiod](https://abyz.me.uk/rpi/pigpio/pigpiod.html) is used as a backend for evaluating GPIO edges. As this does not work on Pi 5B any more, [libgpiod](https://libgpiod.readthedocs.io/en/latest/) is currently adapted as an alternative backend.
 
-For the adoption of Raspberry Pico, the C++ daemon from [picod project](from https://abyz.me.uk/picod/index.html) is used. By contrast, the client-side Python module of `picod`was completely re-written and extended. Eventually, the GPIOs of a Raspberry Pico, attached to a Linux machine via USB 2.0 can be controlled largely as if they were native GPIOs.
+For the adoption of Raspberry Pico, the C++ daemon from [picod project](https://abyz.me.uk/picod/index.html) is used. By contrast, the client-side Python module of `picod`was completely re-written and extended. Eventually, the GPIOs of a Raspberry Pico, connected to a Linux machine via USB 2.0 can be controlled largely as if they were native GPIOs.
 
-For a minimal setup, one central instance of `gpio_server.py` running on a Linux machine is required. Its main task is to translate pre-configured signals received on corresponding GPIOs into key events. Additionally, a server instance can be accessed from CLI tools via a Unix socket. In a more advanced setup, multiple instances of `gpio_server.py` may run on one Linux machine. In this case, each instance is exclusively attached to one available GPIO chip. For example, on a Raspberry Pi 4B, this might be the native GPIO chip of the 40 pin header, and additionaly a Raspberry Pico attached via USB 2.0. Both instances can then be used by clients in the same manner, as long as the desired target is addressed properly.
+For a minimal setup, one central instance of `gpio_server.py` running on a Linux machine is required. Its main task is to translate pre-configured signals received on corresponding GPIOs into key events. Additionally, a server instance can be accessed from CLI tools via a Unix socket. In a more advanced setup, multiple instances of `gpio_server.py` may run on one Linux machine. In this case, each instance is exclusively attached to one available GPIO chip. For example, on a Raspberry Pi 4B, this might be the native GPIO chip of the 40 pin header, and additionaly a Raspberry Pico connected via USB 2.0. Both instances can then be used by clients in the same manner, as long as the desired target is addressed properly.
 
 Since *gpiosvr* is based on asyncio in Python, and asyncio in turn is backed by a C implementation in most of the Python environments, the processing runs fast enough for most use cases, even on single board computers.
 
@@ -109,7 +109,7 @@ In the examples above, these are `KEY_SOUND` and `KEY_VOLUMEUP` / `KEY_VOLUMEDOW
 }
 ```
 
-The example also shows that an indicator LED can be aligned with key events. If you come to the conclusion that `key_monitor.py` can be used independently of `gpio_server.py`, you are right. Imagine a little keypad attached to your single board computer. As the keypad already produces genuine key events in the Linux kernel, you do not need a `gpio_server.py` instance in the first place. It is sufficient to set up a `key_monitor.py` instance along with a configuration file like the one above in order to execute pre-defined commands.
+The example also shows that an indicator LED can be aligned with key events. If you come to the conclusion that `key_monitor.py` can be used independently of `gpio_server.py`, you are right. Imagine a little keypad connected to your single board computer. As the keypad already produces genuine key events in the Linux kernel, you do not need a `gpio_server.py` instance in the first place. It is sufficient to set up a `key_monitor.py` instance along with a configuration file like the one above in order to execute pre-defined commands.
 
 # Installation
 
