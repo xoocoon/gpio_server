@@ -121,8 +121,8 @@ The following packages need to be installed:
 - [pigpio](https://abyz.me.uk/rpi/pigpio/download.html), if *pigpiod* shall be used as a backend for Raspberry Pi up to 4B
 - [libgpiod](https://libgpiod.readthedocs.io/en/latest/python_api.html) package, if *libgpiod* shall be used as a backend for Raspberry Pi up to 5B – **Not yet integrated.**
 - [evdev](https://pypi.org/project/evdev) package, for handling key events
-- [pyserial](https://pypi.org/project/pyserial](https://pypi.org/project/pyserial) package, if Raspberry Pico shall be controlled via USB 2.0
-- [python-systemd](https://github.com/systemd/python-systemd) for running `gpio_server.py` and/or `key_monitor.py` as a systemd service
+- [pyserial](https://pypi.org/project/pyserial) package, if Raspberry Pico shall be controlled via USB 2.0
+- [python-systemd](https://github.com/systemd/python-systemd) for running `gpio_server.py` and/or `key_monitor.py` as systemd service(s)
 
 Except for the first one, on a Debian-based system, the packages can be installed as follows:
 
