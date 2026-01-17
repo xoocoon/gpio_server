@@ -3,9 +3,9 @@ An asyncio-based service translating GPIO signals into Linux kernel key events e
 
 Developed and tested for Raspberry Pi variants, namely Pi 3B, 4B and Pico 1 connected via USB. On Pi 3B and Pi 4B, [pigpiod](https://abyz.me.uk/rpi/pigpio/pigpiod.html) is used as a backend for evaluating GPIO edges. As it does not work on Pi 5B any more, [libgpiod](https://libgpiod.readthedocs.io/en/latest/) is currently adapted as an alternative backend.
 
-For the adoption of Raspberry Pico, the C++ daemon from [picod project](https://abyz.me.uk/picod/index.html) is used. By contrast, the client-side Python module of `picod`was completely re-written and extended. Eventually, the GPIOs of a Raspberry Pico, connected to a Linux machine via USB 2.0 can be controlled largely as if they were native GPIOs.
+For the adoption of Raspberry Pico, the C daemon from [picod project](https://abyz.me.uk/picod/index.html) is used. By contrast, the client-side Python module of `picod`was completely re-written and extended. Eventually, the GPIOs of a Raspberry Pico, connected to a Linux machine via USB 2.0 can be controlled largely as if they were native GPIOs.
 
-For a minimal setup, one central instance of `gpio_server.py` running on a Linux machine is required. Its main task is to translate pre-configured signals received on corresponding GPIOs into key events. Additionally, a server instance can be accessed from CLI tools via a Unix socket. In a more advanced setup, multiple instances of `gpio_server.py` may run on one Linux machine. In this case, each instance is exclusively attached to one available GPIO chip. For example, on a Raspberry Pi 4B, this might be the native GPIO chip of the 40 pin header, and additionaly a Raspberry Pico connected via USB 2.0. Both instances can then be used by clients in the same manner, as long as the desired target is addressed properly.
+For a minimal setup, one central instance of `gpio_server.py` running on a Linux machine is required. Its main task is to translate pre-configured signals received on corresponding GPIOs into key events. Additionally, a server instance can be accessed from CLI tools via a Unix socket. In a more advanced setup, multiple instances of `gpio_server.py` may run on one Linux machine. In this case, each instance is exclusively attached to one available GPIO chip. For example, on a Raspberry Pi 4B, this might be the native GPIO chip of the 40 pin header, and additionally a Raspberry Pico connected via USB 2.0. Both instances might then be used by clients in the same manner, as long as the desired target is addressed properly.
 
 Since *gpiosvr* is based on asyncio, and asyncio in turn is backed by a C implementation in CPython, the processing runs fast enough for most use cases, even on single board computers.
 
@@ -41,9 +41,9 @@ Various signal transmitters can be used with a `gpio_server.py` instance. For tr
 }
 ```
 
-These declarations state that, whenever at least 5 pulses with a length of 9000 microseconds each, are received on GPIO 25 with a timing tolerance of plus/minus 30%, a pair of a key down and a key up event for `KEY_SOUND` shall be propagated via the Linux kernel. Of course, such emulated "key presses" can be processed by another instance on the same Linux machine, triggering virtually any action. 
+These declarations state that, whenever at least 5 pulses with a length of 9000 microseconds each, are received on GPIO 25 with a timing tolerance of plus/minus 30%, a pair of a key down and a key up event for `KEY_SOUND` shall be propagated via the corresponding `/dev/input/event*` device. Of course, such emulated "key presses" can be processed by another instance on the same Linux machine, triggering virtually any action. 
 
-To this end, *gpiosvr* features an additional service `key_monitor.py`. It may be deployed in one or more instances, each grabbing and processing an arbitrary subset of key events. Unless such a processing service is deployed, the effect is no different to really pressing a key on a keyboard. This opens up a versatile way for decoupling signal transmitters and receivers in an ecosystem of Linux deamons, optionally orchestrated by systemd.
+To this end, *gpiosvr* features an additional service `key_monitor.py`. It may be deployed in one or more instances, each grabbing and processing an arbitrary subset of key events. Unless such a key monitoring service is deployed, the effect is no different to really pressing a key on a keyboard. This opens up a versatile way for decoupling signal transmitters and receivers in an ecosystem of Linux deamons, optionally orchestrated by systemd.
 
 Another signal source might be an IR remote control. In this case, the processing service can be omitted entirely when there is already a media center software processing the translated key presses. The following is an example for capturing the pulses of an MCE-compatible remote control.
 
@@ -73,12 +73,12 @@ Another signal source might be an IR remote control. In this case, the processin
 }
 ```
 
-By contrast to the previous example, the configuration above relates to a specific IR protocol handler instead of a generic signal handler. This demonstrates that *gpiosvr* can be extended by individual protocol handlers and corresponding JSON configurations.
+By contrast to the previous example, the configuration relates to a specific IR protocol handler instead of a generic signal handler. This demonstrates that *gpiosvr* can be extended by individual protocol handlers and corresponding JSON configurations.
 
 More complete examples are included in the repo under `templates/`:
 
 - `pi_signal_config.json` includes an example for a light sensor, simply translating any GPIO edge into a pair of key down and key up events.
-- `pico_signal_button_config.json` includes an exmample for translating push button presses, including repeated key events as long as a button is held down.
+- `pico_signal_button_config.json` includes an example for translating push button presses, including repeated key events as long as a button is held down.
 - `pi_signal_ir_config.json` includes an example for mapping the hex codes produced by a RC6_MCE IR handler to key names.
 
 For a reference of supported configuration keys, please see the documentation of the classes `ProtocolDescription`, `ButtonProtocolDescription` and `IrProtocolDescription`. For configuring the signal listeners on top of the signal protocols, please refer to the `SignalListenerConfig` and `ButtonListenerConfig` classes. The classes are located in `gpiosvr.pisignal`, `gpiosvr.pisignal_button` and `gpiosvr.pisignal_ir`, respectively.
@@ -123,7 +123,7 @@ More complete examples are included in the repo under `templates/`:
 
 - `key_rc6-mce_config.json` includes an example for controlling a home theater installation via an IR remote control.
 
-For a reference of supported configuration keys, please see the documentation of the class `gpiosvr.key.KeyDescription`.
+For a reference of supported configuration keys, please see the documentation of the class `KeyDescription`, located in `gpiosvr.key`.
 
 # Installation
 
@@ -171,7 +171,7 @@ python3 -m site
 
 As *gpiosvr* contains command line tools under `bin/`, you might want to add them to your shell's path, e.g. in `~/.profile`.
 
-The following is one possible to extend an existing `PATH` entry in `~/.profile`.
+The following is one possible way to extend an existing `PATH` entry in `~/.profile`.
 
 ```
 perl -i -pe 's~^PATH=("?)(.+?)("?)$~PATH=\1\2:GPIOSVR_PATH/bin\3~g' ~/.profile
