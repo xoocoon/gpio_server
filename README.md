@@ -1,13 +1,13 @@
 # gpiosvr
-An asyncio-based service translating GPIO signals into Linux kernel key events.
+An asyncio-based service translating GPIO signals into Linux kernel key events exposed via `/dev/input/event*`.
 
-Developed and tested for Raspberry Pi variants, namely Pi 3B, 4B and Pico 1 connected via USB. On Pi 3B and Pi 4B, [pigpiod](https://abyz.me.uk/rpi/pigpio/pigpiod.html) is used as a backend for evaluating GPIO edges. As this does not work on Pi 5B any more, [libgpiod](https://libgpiod.readthedocs.io/en/latest/) is currently adapted as an alternative backend.
+Developed and tested for Raspberry Pi variants, namely Pi 3B, 4B and Pico 1 connected via USB. On Pi 3B and Pi 4B, [pigpiod](https://abyz.me.uk/rpi/pigpio/pigpiod.html) is used as a backend for evaluating GPIO edges. As it does not work on Pi 5B any more, [libgpiod](https://libgpiod.readthedocs.io/en/latest/) is currently adapted as an alternative backend.
 
 For the adoption of Raspberry Pico, the C++ daemon from [picod project](https://abyz.me.uk/picod/index.html) is used. By contrast, the client-side Python module of `picod`was completely re-written and extended. Eventually, the GPIOs of a Raspberry Pico, connected to a Linux machine via USB 2.0 can be controlled largely as if they were native GPIOs.
 
 For a minimal setup, one central instance of `gpio_server.py` running on a Linux machine is required. Its main task is to translate pre-configured signals received on corresponding GPIOs into key events. Additionally, a server instance can be accessed from CLI tools via a Unix socket. In a more advanced setup, multiple instances of `gpio_server.py` may run on one Linux machine. In this case, each instance is exclusively attached to one available GPIO chip. For example, on a Raspberry Pi 4B, this might be the native GPIO chip of the 40 pin header, and additionaly a Raspberry Pico connected via USB 2.0. Both instances can then be used by clients in the same manner, as long as the desired target is addressed properly.
 
-Since *gpiosvr* is based on asyncio in Python, and asyncio in turn is backed by a C implementation in most of the Python environments, the processing runs fast enough for most use cases, even on single board computers.
+Since *gpiosvr* is based on asyncio, and asyncio in turn is backed by a C implementation in CPython, the processing runs fast enough for most use cases, even on single board computers.
 
 ## Signal definition language
 
@@ -75,6 +75,14 @@ Another signal source might be an IR remote control. In this case, the processin
 
 By contrast to the previous example, the configuration above relates to a specific IR protocol handler instead of a generic signal handler. This demonstrates that *gpiosvr* can be extended by individual protocol handlers and corresponding JSON configurations.
 
+More complete examples are included in the repo under `templates/`:
+
+- `pi_sigkey_config.json` includes an example for a light sensor, simply translating any GPIO edge into a pair of key down and key up events.
+- `pico_buttonkey_config.json` includes an exmample for translating push button presses, including repeated key events as long as a button is held down.
+- `pi_irkey_config.json` includes an example for mapping the hex codes produced by a RC6_MCE IR handler to key names.
+
+For a reference of supported configuration keys, please see the documentation of the classes `gpiosvr.pisignal.ProtocolDescription`, `gpiosvr.pisignal_button.ButtonProtocolDescription` and `gpiosvr.pisignal_ir.IrProtocolDescription`, respectively.
+
 ## Key definitions
 
 The key definitions used by *gpiosvr* correspond to the constants used by the Linux kernel, as defined in [input-event-codes.h](https://github.com/torvalds/linux/blob/master/include/uapi/linux/input-event-codes.h).
@@ -111,6 +119,12 @@ In the examples above, these are `KEY_SOUND` and `KEY_VOLUMEUP` / `KEY_VOLUMEDOW
 
 The example also shows that an indicator LED can be aligned with key events. If you come to the conclusion that `key_monitor.py` can be used independently of `gpio_server.py`, you are right. Imagine a little keypad connected to your single board computer. As the keypad already produces genuine key events in the Linux kernel, you do not need a `gpio_server.py` instance in the first place. It is sufficient to set up a `key_monitor.py` instance along with a configuration file like the one above in order to execute pre-defined commands.
 
+More complete examples are included in the repo under `templates/`:
+
+- `key_rc6-mce_config.json` includes an example for controlling a home theater installation via an IR remote control.
+
+For a reference of supported configuration keys, please see the documentation of the class `gpiosvr.key.KeyDescription`.
+
 # Installation
 
 ## Package dependencies
@@ -143,23 +157,24 @@ ls /dev/uinput       # must yield the output '/dev/uinput'
 
 Currently, the *gpisvr* package does not ship with an installation script. As soon as it is cloned or downloaded from GitHub, the python files are ready to use.
 
-However, for setting up `gpio_server.py` and/or `key_monitor.py` as system-wide daemons, it is recommended to add the package to Python's global paths. The following is the recommended approach with a `.pth` file.
+However, for setting up `gpio_server.py` and/or `key_monitor.py` as system-wide daemons, it is recommended to add the package to Python's global paths. The following is the recommended approach with a `.pth` file. If you use a virtual environment of Python in lieu of system-wide one, please adjust the paths accordingly.
 
 ```
 echo GPIOSVR_PARENT_PATH | sudo tee -a "/usr/local/lib/python$( python3 --version | grep -oP '\d\.\d{1,2}' )/dist-packages/xoocoon.pth"
-python -m site
+# Check if GPIOSVR_PARENT_PATH is included in the global paths.
+python3 -m site
 ```
 
 ... where `GPIOSVR_PARENT_PATH` is the path to the directory containing the *gpiosvr* package.
 
 ## CLI tools registration
 
-As *gpiosvr* ships with command line tools like `pigs`, you might want to add them to your shell's path, e.g. in `~/.profile`.
+As *gpiosvr* contains command line tools under `bin/`, you might want to add them to your shell's path, e.g. in `~/.profile`.
 
 The following is one possible to extend an existing `PATH` entry in `~/.profile`.
 
 ```
-perl -i -pe 's~^PATH=("?)(.+?)("?)$~PATH=\1\2:GPIOSVR_PATH\3~g' ~/.profile
+perl -i -pe 's~^PATH=("?)(.+?)("?)$~PATH=\1\2:GPIOSVR_PATH/bin\3~g' ~/.profile
 ```
 
 ... where `GPIOSVR_PATH` is the path to the directory of the *gpiosvr* package.
@@ -180,7 +195,7 @@ By contrast, it is **not** recommended to have `pico_server.service` start up au
 
 To make a Raspberry Pico hardware work with *gpiosvr*, the microcode contained in `picod/picod.uf2` must be deployed to it. For that, hold down the "BOOT/SEL" button on the Pico, while connected it to a host machine via USB 2.0. In a file browser of your choice, copy the file to the `RPI-RP2` volume. After the automatic reboot, the Pico will be ready to talk to an accordingly configured `gpio_server.py` instance.
 
-The microcode was obtained from the [picod project](from https://abyz.me.uk/picod/index.html).
+The source code for the microcode was obtained from the [picod project](from https://abyz.me.uk/picod/index.html).
 
 # Project state
 
