@@ -1,50 +1,9 @@
 {
   "evdevName": "pi-sig-injector",
   "gpios": {
-    "9": "lan",
-    "14": "gate",
-    "2": "light"
+    "12": "light"
   },
   "signalProtocols": {
-    "lan": {
-      "basePulse_μs": 25000,
-      "lengthTarget_basePulseCount": 9,
-      "bitOrder": "MSB_FIRST",
-      "codeStartBit": 1,
-      "preamble_ms": 225,
-      "postamble_ms": 300,
-      "minPulseCheckInterval_ms": -1,
-      "tolerancePercentage": 10,
-      "debounce_μs": 20000,
-      "signalListener": {
-        "mayInject": true
-      },
-      "keys": {
-        "0x155": {
-          "keyName": "KEY_CONNECT" 
-        },
-        "0x1d5": {
-          "keyName": "KEY_CANCEL"
-        },
-        "0x157": {
-          "keyName": "KEY_LOGOFF"
-        }
-      }
-    },
-    "gate": {
-      "basePulse_μs": 50000,
-      "lengthTarget_basePulseCount": 1,
-      "codeStartBit": 1,
-      "preamble_ms": 150,
-      "postamble_ms": 300,
-      "tolerancePercentage": 5,
-      "debounce_μs": 45000,
-      "keys": {
-        "0x1": {
-          "keyName": "KEY_SOUND"
-        }
-      }
-    },
     "light": {
       "edgeTargetCount": 1,
       "codeStartBit": "GPIO_LEVEL",

@@ -77,11 +77,11 @@ By contrast to the previous example, the configuration above relates to a specif
 
 More complete examples are included in the repo under `templates/`:
 
-- `pi_sigkey_config.json` includes an example for a light sensor, simply translating any GPIO edge into a pair of key down and key up events.
-- `pico_buttonkey_config.json` includes an exmample for translating push button presses, including repeated key events as long as a button is held down.
-- `pi_irkey_config.json` includes an example for mapping the hex codes produced by a RC6_MCE IR handler to key names.
+- `pi_signal_config.json` includes an example for a light sensor, simply translating any GPIO edge into a pair of key down and key up events.
+- `pico_signal_button_config.json` includes an exmample for translating push button presses, including repeated key events as long as a button is held down.
+- `pi_signal_ir_config.json` includes an example for mapping the hex codes produced by a RC6_MCE IR handler to key names.
 
-For a reference of supported configuration keys, please see the documentation of the classes `gpiosvr.pisignal.ProtocolDescription`, `gpiosvr.pisignal_button.ButtonProtocolDescription` and `gpiosvr.pisignal_ir.IrProtocolDescription`, respectively.
+For a reference of supported configuration keys, please see the documentation of the classes `ProtocolDescription`, `ButtonProtocolDescription` and `IrProtocolDescription`. For configuring the signal listeners on top of the signal protocols, please refer to the `SignalListenerConfig` and `ButtonListenerConfig` classes. The classes are located in `gpiosvr.pisignal`, `gpiosvr.pisignal_button` and `gpiosvr.pisignal_ir`, respectively.
 
 ## Key definitions
 
