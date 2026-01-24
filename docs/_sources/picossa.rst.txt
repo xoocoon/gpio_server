@@ -1,0 +1,7 @@
+picossa module
+==============
+
+.. automodule:: picossa
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+pisocket module
+===============
+
+.. automodule:: pisocket
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,80 @@
+signal module
+=============
+
+.. automodule:: gpiosvr.signal
+
+.. contents::
+   :local:
+   :depth: 2
+
+.. _configuration:
+
+Configuration classes
+---------------------
+
+The classes in this section hold configurations for signal protocols, signal
+listeners and GPIO mappings. They can be easily initialized with `dict` 
+instances, e.g. read from JSON files. 
+
+Auto-discovering and parsing JSON files are out of scope for
+:mod:`gpiosvr.signal`. See the :mod:`ctlshell` package instead. The following is
+a sample JSON representation of a signal configuration::
+
+   {
+     "evdevName": "pi-sig-injector",
+     "gpios": {
+       "25": "door-bell"
+     },
+     "signalProtocols": {
+       "door-bell": {
+         "basePulse_μs": 9000,
+         "lengthTarget_basePulseCount": 5,
+         "codeStartBit": 1,
+         "preamble_ms": 10,
+         "postamble_ms": 12,
+         "tolerancePercentage": 30,
+         "debounce_μs": 600,
+         "signalListener": {
+           "mayInject": false
+         },
+         "keys": {
+           "0x1f": {
+             "keyName": "KEY_SOUND"
+           }
+         }
+       }
+     }
+   }
+
+
+.. autoclass:: gpiosvr.signal.SignalConfig
+   :members:
+   :special-members: __init__
+
+.. autoclass:: gpiosvr.signal.SignalProtocolDescription
+   :members:
+   :special-members: __init__
+
+.. autoclass:: gpiosvr.signal.SignalListenerConfig
+   :members:
+   :special-members: __init__
+
+Constants and defaults
+----------------------
+
+.. autodata:: gpiosvr.signal.TOLERANCE_PERCENTAGE_DEFAULT
+
+.. autodata:: gpiosvr.signal.DEBOUNCE_μS_DEFAULT
+
+.. autoclass:: gpiosvr.signal.BitOrder
+   :members:
+
+.. autodata:: gpiosvr.signal.BIT_ORDER_DEFAULT
+
+.. autodata:: gpiosvr.signal.CODE_START_BIT_DEFAULT
+
+Helper classes
+--------------
+
+.. autoclass:: gpiosvr.signal.PulseHelper
+   :members:
