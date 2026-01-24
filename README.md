@@ -9,6 +9,8 @@ For a minimal setup, one central instance of `gpio_server.py` running on a Linux
 
 Since *gpiosvr* is based on asyncio, and asyncio in turn is backed by a C implementation in CPython, the processing runs fast enough for most use cases, even on single board computers.
 
+For apidocs, see [https://xoocoon.github.io/gpiosvr](https://xoocoon.github.io/gpiosvr/).
+
 ## Signal definition language
 
 Various signal transmitters can be used with a `gpio_server.py` instance. For translating pulsed and other signals into key events, a `gpio_server.py` instance requires protocol definitions in one or more JSON files. The following is an example for capturing a pulsating door bell signal. On the hardware side, whenever the door bell rings, a rectifier and Z diode emits pulses to GPIO 25. With the following JSON declarations, a `KEY_SOUND` key press is emulated.
@@ -20,7 +22,7 @@ Various signal transmitters can be used with a `gpio_server.py` instance. For tr
     "25": "door-bell"
   },
   "signalProtocols": {
-    "gate-bell": {
+    "door-bell": {
       "basePulse_μs": 9000,
       "lengthTarget_basePulseCount": 5,
       "codeStartBit": 1,
@@ -81,7 +83,7 @@ More complete examples are included in the repo under `templates/`:
 - `pico_signal_button_config.json` includes an example for translating push button presses, including repeated key events as long as a button is held down.
 - `pi_signal_ir_config.json` includes an example for mapping the hex codes produced by a RC6_MCE IR handler to key names.
 
-For a reference of supported configuration keys, please see the documentation of the classes `ProtocolDescription`, `ButtonProtocolDescription` and `IrProtocolDescription`. For configuring the signal listeners on top of the signal protocols, please refer to the `SignalListenerConfig` and `ButtonListenerConfig` classes. The classes are located in `gpiosvr.pisignal`, `gpiosvr.pisignal_button` and `gpiosvr.pisignal_ir`, respectively.
+For a reference of supported configuration keys, please see the documentation of the [signal](https://xoocoon.github.io/gpiosvr/signal.html#configuration-classes) module.
 
 ## Key definitions
 
@@ -123,7 +125,7 @@ More complete examples are included in the repo under `templates/`:
 
 - `key_rc6-mce_config.json` includes an example for controlling a home theater installation via an IR remote control.
 
-For a reference of supported configuration keys, please see the documentation of the class `KeyDescription`, located in `gpiosvr.key`.
+For a reference of supported configuration keys, please see the documentation of the [key](https://xoocoon.github.io/gpiosvr/key.html#configuration-classes) module.
 
 # Installation
 
@@ -195,7 +197,7 @@ By contrast, it is **not** recommended to have `pico_server.service` start up au
 
 To make a Raspberry Pico hardware work with *gpiosvr*, the microcode contained in `picod/picod.uf2` must be deployed to it. For that, hold down the "BOOT/SEL" button on the Pico, while connected it to a host machine via USB 2.0. In a file browser of your choice, copy the file to the `RPI-RP2` volume. After the automatic reboot, the Pico will be ready to talk to an accordingly configured `gpio_server.py` instance.
 
-The source code for the microcode was obtained from the [picod project](from https://abyz.me.uk/picod/index.html).
+The source code for the microcode was obtained from the [picod project](https://abyz.me.uk/picod/index.html).
 
 # Project state
 
